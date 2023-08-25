@@ -1,0 +1,93 @@
+<form id="addOrUpdateForm" lay-filter="addOrUpdateForm" class="layui-form model-form">
+
+    <input name="id" type="hidden"/>
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">邮箱</label>
+        <div class="layui-input-block">
+            <input name="email" class="layui-input" placeholder="请输入邮箱" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">登录名</label>
+        <div class="layui-input-block">
+            <input name="name" class="layui-input" placeholder="请输入登录名" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">密码</label>
+        <div class="layui-input-block">
+            <input name="password" class="layui-input" placeholder="请输入密码" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">邀请码</label>
+        <div class="layui-input-block">
+            <input name="inviteCode" class="layui-input" placeholder="请输入邀请码" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">剩余聊天次数</label>
+        <div class="layui-input-block">
+            <input name="chatNum" class="layui-input" placeholder="请输入剩余聊天次数" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">剩余绘画次数</label>
+        <div class="layui-input-block">
+            <input name="drawNum" class="layui-input" placeholder="请输入剩余绘画次数" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label layui-form-required">状态</label>
+        <div class="layui-input-block">
+            <input name="state" class="layui-input" placeholder="请输入状态" lay-verType="tips" lay-verify="required" required/>
+        </div>
+    </div>
+
+    <div class="layui-form-item text-right">
+        <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">取消</button>
+        <button class="layui-btn" lay-filter="formSubmitBtn" lay-submit>保存</button>
+    </div>
+</form>
+
+<script>
+    layui.use(['layer', 'form', 'admin', 'xnUtil', 'xmSelect', 'laydate'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        var admin = layui.admin;
+        var xnUtil = layui.xnUtil;
+        var xmSelect = layui.xmSelect;
+        var laydate = layui.laydate;
+
+
+        var editData = admin.getLayerData('#addOrUpdateForm').data;
+        if(editData !== null && editData !== undefined) {
+            form.val('addOrUpdateForm', editData);
+        }
+
+        /**
+         * 表单提交事件
+         */
+        form.on('submit(formSubmitBtn)', function (data) {
+            layer.load(2);
+
+            var url = editData ? getProjectUrl() + 'chatGptUserInfo/edit' : getProjectUrl() + 'chatGptUserInfo/add';
+            admin.req(url, JSON.stringify(data.field), function(res){
+                layer.msg(res.message, {icon: 1, time: 1000}, function () {
+                    admin.putLayerData('formOk', true, '#addOrUpdateForm');
+                    admin.closeDialog('#addOrUpdateForm');
+                });
+            }, 'post');
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
