@@ -162,6 +162,10 @@ public interface CommonConstant {
      */
     String DATABASE_USER_NAME = "DATABASE_USER_NAME";
 
-    String CHAT_AUTH_EMAIL_CODE = "CHAT_AUTH_EMAIL_CODE|";
+    String CHAT_AUTH = "CHAT_AUTH|";
+
+    String CHAT_AUTH_LOGIN_TIME = CHAT_AUTH + "LOGIN_TIME|";
+
+    String AES_PASS = "aes2023@^)";
 
 }
