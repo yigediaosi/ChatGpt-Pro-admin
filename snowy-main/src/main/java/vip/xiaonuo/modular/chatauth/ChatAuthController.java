@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Controller
 @RequestMapping("/chatAuth")
+@CrossOrigin
 public class ChatAuthController {
 
     private static final Log log = Log.get();

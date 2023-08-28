@@ -129,7 +129,7 @@ public class SysLoginController {
     @GetMapping("/logout")
     public String logoutPage() {
         authService.logout();
-        return "redirect:/login";
+        return "redirect:/";
     }
 
     /**

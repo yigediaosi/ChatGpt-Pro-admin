@@ -168,6 +168,6 @@ public interface CommonConstant {
 
     String CHAT_AUTH_LOGIN_STATE = CHAT_AUTH + "LOGIN_STATE|";
 
-    String AES_PASS = "aes2023@^)";
+    String AES_PASS = "9!#95hsup*&$1zq7";
 
 }
