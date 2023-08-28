@@ -66,12 +66,7 @@ public class ChatAuthController {
         Random random = new Random();
         int randomNumber = random.nextInt(9000) + 1000;
         sendMailParam.setContent(randomNumber + "");
-        try {
-            mailSender.sendMail163(sendMailParam);
-        } catch (MessagingException e) {
-            log.error(">>> 邮件发送异常，请求号为：{}，具体信息为：{}", RequestNoContext.get(), e.getMessage());
-            throw new ServiceException(SysEmailExceptionEnum.EMAIL_SEND_ERROR);
-        }
+        mailSender.sendMailQQ(sendMailParam);
         redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH + chatAuthParam.getEmail(), randomNumber, 60, TimeUnit.SECONDS);
         return new SuccessResponseData();
     }
