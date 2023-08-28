@@ -103,6 +103,7 @@
                     {field: 'chatNum', title: '剩余聊天次数', sort: true},
                     {field: 'drawNum', title: '剩余绘画次数', sort: true},
                     {field: 'state', title: '状态', sort: true},
+                    {field: 'state', title: '状态', sort: true, templet: function (d) {  return  xnUtil.rendDataTableDict(d.state, 'common_status')  } },
                     {title: '操作', toolbar: '#tableBar', align: 'center', width: 200, minWidth: 200}
                 ]
             ],

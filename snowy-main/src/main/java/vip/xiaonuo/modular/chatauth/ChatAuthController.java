@@ -7,7 +7,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import vip.xiaonuo.core.consts.CommonConstant;
-import vip.xiaonuo.core.context.requestno.RequestNoContext;
 import vip.xiaonuo.core.email.MailSender;
 import vip.xiaonuo.core.email.modular.model.SendMailParam;
 import vip.xiaonuo.core.exception.ServiceException;
@@ -23,7 +22,6 @@ import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
 import vip.xiaonuo.modular.gptuserinfo.service.ChatGptUserInfoService;
 import vip.xiaonuo.sys.modular.email.enums.SysEmailExceptionEnum;
 import javax.annotation.Resource;
-import javax.mail.*;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -116,6 +114,13 @@ public class ChatAuthController {
         if (null == code || Integer.parseInt(chatRegister.getCode()) != code) {
             return new SuccessResponseData(900, "验证码已失效或发送失败，请重新获取验证码", null);
         }
+        LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
+                .eq(ChatGptUserInfo::getEmail, chatRegister.getEmail());
+        ChatGptUserInfo chatGptUserInfo = chatGptUserInfoService.getOne(queryWrapper);
+        if (null != chatGptUserInfo) {
+            return new SuccessResponseData(900, "邮箱已注册", null);
+        }
+
         ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
         chatGptUserInfoParam.setChatNum(20);
         chatGptUserInfoParam.setDrawNum(3);
@@ -143,7 +148,7 @@ public class ChatAuthController {
                 .eq(ChatGptUserInfo::getEmail, chatCheck.getEmail());
         ChatGptUserInfo chatGptUserInfo = chatGptUserInfoService.getOne(queryWrapper);
         if (null == chatGptUserInfo) {
-            return new SuccessResponseData(900, "用户不存在，请先注册", null);
+            return new SuccessResponseData(904, "用户不存在，请先注册", null);
         }
         if (chatGptUserInfo.getState() == 1) {
             return new SuccessResponseData(901, "账号被锁定", null);
