@@ -66,6 +66,7 @@ public class ChatGptUserInfoParam extends BaseParam {
      */
     private String inviteCode;
 
+    private Integer integral;
     /**
      * 剩余聊天次数
      */

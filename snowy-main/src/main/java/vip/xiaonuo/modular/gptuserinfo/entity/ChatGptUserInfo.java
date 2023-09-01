@@ -92,4 +92,9 @@ public class ChatGptUserInfo extends BaseEntity {
     private Date lastLoginTime;
 
 
+    /**
+     * 签到时间
+     */
+    private Date checkinTime;
+
 }

@@ -25,7 +25,11 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
 package vip.xiaonuo.modular.gptuserinfo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import vip.xiaonuo.core.pojo.login.ChatAuth;
+import vip.xiaonuo.core.pojo.login.ChatCheck;
+import vip.xiaonuo.core.pojo.login.ChatRegister;
 import vip.xiaonuo.core.pojo.page.PageResult;
+import vip.xiaonuo.core.pojo.response.ResponseData;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
 import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
@@ -94,4 +98,52 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @date 2023-08-21 21:49:44
      */
      ChatGptUserInfoResp getUserInfo(String email);
+
+    /**
+     * 注册
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData register(ChatRegister chatRegister);
+
+    /**
+     * 签到
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData checkIn(ChatAuth chatAuth);
+
+    /**
+     * 签到
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData refresh(ChatAuth chatAuth);
+
+    /**
+     * 发送邮件
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData sendEmail(ChatAuth chatAuthParam);
+
+    /**
+     * 登陆
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData login(ChatAuth chatAuthParam);
+
+    /**
+     * 用户校验
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+    ResponseData check(ChatCheck chatCheck);
 }
