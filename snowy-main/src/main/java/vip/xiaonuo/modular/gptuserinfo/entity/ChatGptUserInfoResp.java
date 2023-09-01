@@ -24,12 +24,16 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
  */
 package vip.xiaonuo.modular.gptuserinfo.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import vip.xiaonuo.core.pojo.base.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.*;
+import vip.xiaonuo.core.pojo.base.entity.BaseEntity;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 会员信息
@@ -37,31 +41,16 @@ import java.util.*;
  * @author 981743898@qq.com
  * @date 2023-08-21 21:49:44
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-@TableName("chat_gpt_user_info")
-public class ChatGptUserInfo extends BaseEntity {
 
-    /**
-     * 
-     */
-    @TableId(type = IdType.AUTO)
-    private Integer id;
+@Data
+public class ChatGptUserInfoResp implements Serializable {
+
+
 
     /**
      * 邮箱
      */
     private String email;
-
-    /**
-     * 登录名
-     */
-    private String name;
-
-    /**
-     * 密码
-     */
-    private String password;
 
     /**
      * 邀请码
@@ -83,13 +72,7 @@ public class ChatGptUserInfo extends BaseEntity {
      */
     private Integer integral;
 
-    /**
-     * 状态
-     */
-    private Integer state;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date lastLoginTime;
 
 
 }

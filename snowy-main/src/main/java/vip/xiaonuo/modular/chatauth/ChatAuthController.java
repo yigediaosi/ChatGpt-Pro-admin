@@ -3,6 +3,7 @@ package vip.xiaonuo.modular.chatauth;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.log.Log;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import vip.xiaonuo.core.pojo.response.SuccessResponseData;
 import vip.xiaonuo.core.util.AESUtil;
 import vip.xiaonuo.core.util.IdGen;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
+import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
 import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
 import vip.xiaonuo.modular.gptuserinfo.service.ChatGptUserInfoService;
 import vip.xiaonuo.sys.modular.email.enums.SysEmailExceptionEnum;
@@ -85,7 +87,7 @@ public class ChatAuthController {
             return new SuccessResponseData(900, "用户不存在，请先注册", null);
         }
         if (chatGptUserInfo.getState() == 1) {
-            redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 72 * 60 * 60, TimeUnit.SECONDS);
+            redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 5 * 60, TimeUnit.SECONDS);
             return new SuccessResponseData(901, "账号被锁定", null);
         }
         String passEnc = AESUtil.encrypt(chatAuthParam.getPassword());
@@ -95,7 +97,7 @@ public class ChatAuthController {
             if (num == 5) {
                 chatGptUserInfo.setState(1);
                 chatGptUserInfoService.updateById(chatGptUserInfo);
-                redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 72 * 60 * 60, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 5 * 60, TimeUnit.SECONDS);
                 return new SuccessResponseData(901, "账号被锁定", null);
             }
             redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_TIME + chatAuthParam.getEmail(), num, 5 * 60, TimeUnit.SECONDS);
@@ -169,5 +171,16 @@ public class ChatAuthController {
         chatGptUserInfoService.updateById(chatGptUserInfo);
 
         return new SuccessResponseData();
+    }
+
+
+    @PostMapping("/getUserInfo")
+    @ResponseBody
+    public ResponseData userInfo(@RequestBody ChatAuth chat) {
+        ChatGptUserInfoResp resp = (ChatGptUserInfoResp) redisTemplate.opsForValue().get(CommonConstant.CHAT_USER_INFO + chat.getEmail());
+        if (null == resp){
+            resp = chatGptUserInfoService.getUserInfo(chat.getEmail());
+        }
+        return new SuccessResponseData(resp);
     }
 }

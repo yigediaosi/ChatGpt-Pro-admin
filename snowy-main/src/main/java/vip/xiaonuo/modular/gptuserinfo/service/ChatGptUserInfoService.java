@@ -27,6 +27,7 @@ package vip.xiaonuo.modular.gptuserinfo.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import vip.xiaonuo.core.pojo.page.PageResult;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
+import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
 import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
 import java.util.List;
 
@@ -85,4 +86,12 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @date 2023-08-21 21:49:44
      */
      ChatGptUserInfo detail(ChatGptUserInfoParam chatGptUserInfoParam);
+
+    /**
+     * 获取会员信息
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
+     */
+     ChatGptUserInfoResp getUserInfo(String email);
 }

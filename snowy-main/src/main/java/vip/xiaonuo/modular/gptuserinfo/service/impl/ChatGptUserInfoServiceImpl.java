@@ -30,12 +30,15 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import vip.xiaonuo.core.consts.CommonConstant;
 import vip.xiaonuo.core.enums.CommonStatusEnum;
 import vip.xiaonuo.core.exception.ServiceException;
 import vip.xiaonuo.core.factory.PageFactory;
 import vip.xiaonuo.core.pojo.page.PageResult;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
+import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
 import vip.xiaonuo.modular.gptuserinfo.enums.ChatGptUserInfoExceptionEnum;
 import vip.xiaonuo.modular.gptuserinfo.mapper.ChatGptUserInfoMapper;
 import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
@@ -44,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 会员信息service接口实现类
@@ -53,6 +57,9 @@ import java.util.List;
  */
 @Service
 public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMapper, ChatGptUserInfo> implements ChatGptUserInfoService {
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public PageResult<ChatGptUserInfo> page(ChatGptUserInfoParam chatGptUserInfoParam) {
@@ -123,6 +130,17 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     @Override
     public ChatGptUserInfo detail(ChatGptUserInfoParam chatGptUserInfoParam) {
         return this.queryChatGptUserInfo(chatGptUserInfoParam);
+    }
+
+    @Override
+    public ChatGptUserInfoResp getUserInfo(String email) {
+        LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
+                .eq(ChatGptUserInfo::getEmail, email);
+        ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
+        ChatGptUserInfoResp resp = new ChatGptUserInfoResp();
+        BeanUtils.copyProperties(chatGptUserInfo, resp);
+        redisTemplate.opsForValue().set(CommonConstant.CHAT_USER_INFO + email, resp, 5 * 60, TimeUnit.SECONDS);
+        return resp;
     }
 
     /**
