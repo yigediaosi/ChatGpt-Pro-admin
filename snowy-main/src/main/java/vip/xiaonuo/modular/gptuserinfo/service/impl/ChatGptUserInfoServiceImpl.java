@@ -26,7 +26,6 @@ package vip.xiaonuo.modular.gptuserinfo.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,15 +35,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import vip.xiaonuo.core.consts.CommonConstant;
 import vip.xiaonuo.core.email.MailSender;
 import vip.xiaonuo.core.email.modular.model.SendMailParam;
-import vip.xiaonuo.core.enums.CommonStatusEnum;
 import vip.xiaonuo.core.exception.ServiceException;
 import vip.xiaonuo.core.factory.PageFactory;
 import vip.xiaonuo.core.pojo.login.ChatAuth;
 import vip.xiaonuo.core.pojo.login.ChatCheck;
 import vip.xiaonuo.core.pojo.login.ChatRegister;
 import vip.xiaonuo.core.pojo.page.PageResult;
-import vip.xiaonuo.core.pojo.response.ResponseData;
-import vip.xiaonuo.core.pojo.response.SuccessResponseData;
 import vip.xiaonuo.core.util.AESUtil;
 import vip.xiaonuo.core.util.IdGen;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
@@ -56,7 +52,6 @@ import vip.xiaonuo.modular.gptuserinfo.service.ChatGptUserInfoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vip.xiaonuo.sys.modular.email.enums.SysEmailExceptionEnum;
-
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -162,17 +157,17 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     }
 
     @Override
-    public ResponseData register(ChatRegister chatRegister) {
+    public void register(ChatRegister chatRegister) {
         Integer code = (Integer) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH + chatRegister.getEmail());
 
         if (null == code || Integer.parseInt(chatRegister.getCode()) != code) {
-            return new SuccessResponseData(900, "验证码已失效或发送失败，请重新获取验证码", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.CODE_IS_EXPIRE);
         }
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatRegister.getEmail());
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
         if (null != chatGptUserInfo) {
-            return new SuccessResponseData(900, "邮箱已注册", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.EMAIL_IS_EXIST);
         }
 
         // 邀请码不为空 增加邀请人积分
@@ -181,7 +176,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
                     .eq(ChatGptUserInfo::getInviteCode, chatRegister.getInviteCode());
             ChatGptUserInfo chatGptUserInfo2 = this.getOne(queryWrapper2);
             if (null == chatGptUserInfo2){
-                return new SuccessResponseData(906, "邀请码不存在", null);
+                throw new ServiceException(ChatGptUserInfoExceptionEnum.INVITATION_CODE_IS_NOT_EXIST);
             }
             ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
             // 暂定每次邀请+20积分
@@ -203,20 +198,19 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         chatGptUserInfoParam.setPassword(passEnc);
         chatGptUserInfoParam.setState(0);
         this.add(chatGptUserInfoParam);
-        return new SuccessResponseData();
     }
 
     @Override
-    public ResponseData checkIn(ChatAuth chatAuth) {
+    public void checkIn(ChatAuth chatAuth) {
         String code = (String) redisTemplate.opsForValue().get(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail());
         if (StringUtils.isNotBlank(code)){
-            return new SuccessResponseData(907, "今天已经签过到了~", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.SIGNED_IN);
         }
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatAuth.getEmail());
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
         if (null == chatGptUserInfo) {
-            return new SuccessResponseData(900, "用户不存在，请先注册", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.USER_IS_EXIST);
         }
         if (null != chatGptUserInfo.getCheckinTime()){
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -226,7 +220,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             String currentDateString = dateFormat.format(currentDate);
             String dateToCompareString = dateFormat.format(dateToCompare);
             if (currentDateString.equals(dateToCompareString)) {
-                return new SuccessResponseData(907, "今天已经签过到了~", null);
+                throw new ServiceException(ChatGptUserInfoExceptionEnum.SIGNED_IN);
             }
         }
         chatGptUserInfo.setCheckinTime(new Date());
@@ -236,7 +230,6 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         long midnightSeconds = calculateSecondsUntilMidnight();
 
         redisTemplate.opsForValue().set(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail(), "signed" , midnightSeconds, TimeUnit.SECONDS);
-        return new SuccessResponseData();
     }
 
     /**
@@ -255,19 +248,18 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     }
 
     @Override
-    public ResponseData refresh(ChatAuth chatAuth) {
+    public Integer refresh(ChatAuth chatAuth) {
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatAuth.getEmail());
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
-
-        return new SuccessResponseData(null != chatGptUserInfo ? chatGptUserInfo.getIntegral() : 0);
+        return null != chatGptUserInfo ? chatGptUserInfo.getIntegral() : 0;
     }
 
     @Override
-    public ResponseData sendEmail(ChatAuth chatAuthParam) {
+    public void sendEmail(ChatAuth chatAuthParam) {
         Integer code = (Integer) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH + chatAuthParam.getEmail());
         if (null != code){
-            return new SuccessResponseData(901, "发送过于频繁，请等待1分钟后再试", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.SEND_FREQUENTLY);
         }
         if (ObjectUtil.isEmpty(chatAuthParam.getEmail())) {
             throw new ServiceException(SysEmailExceptionEnum.EMAIL_TO_EMPTY);
@@ -281,24 +273,24 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         sendMailParam.setContent(randomNumber + "");
         mailSender.sendMailQQ(sendMailParam);
         redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH + chatAuthParam.getEmail(), randomNumber, 60, TimeUnit.SECONDS);
-        return new SuccessResponseData();
+
     }
 
     @Override
-    public ResponseData login(ChatAuth chatAuthParam) {
+    public void login(ChatAuth chatAuthParam) {
         Boolean state = (Boolean) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail());
         if (null != state && state){
-            return new SuccessResponseData(901, "账号被锁定", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatAuthParam.getEmail());
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
         if (null == chatGptUserInfo) {
-            return new SuccessResponseData(900, "用户不存在，请先注册", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.USER_IS_EXIST);
         }
         if (chatGptUserInfo.getState() == 1) {
             redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 5 * 60, TimeUnit.SECONDS);
-            return new SuccessResponseData(901, "账号被锁定", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
         String passEnc = AESUtil.encrypt(chatAuthParam.getPassword());
         if (!chatGptUserInfo.getPassword().equals(passEnc)) {
@@ -308,47 +300,45 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
                 chatGptUserInfo.setState(1);
                 this.updateById(chatGptUserInfo);
                 redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail(), true, 5 * 60, TimeUnit.SECONDS);
-                return new SuccessResponseData(901, "账号被锁定", null);
+                throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
             }
             redisTemplate.opsForValue().set(CommonConstant.CHAT_AUTH_LOGIN_TIME + chatAuthParam.getEmail(), num, 5 * 60, TimeUnit.SECONDS);
-            return new SuccessResponseData(902, "账密或密码错误，剩余[" + (5 - num) + "]次机会", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.PASS_ERROR_TIME, 5 - num);
         }
         chatGptUserInfo.setLastLoginTime(new Date());
         this.updateById(chatGptUserInfo);
-        return new SuccessResponseData();
     }
 
     @Override
-    public ResponseData check(ChatCheck chatCheck) {
+    public void check(ChatCheck chatCheck) {
         Boolean state = (Boolean) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatCheck.getEmail());
         if (null != state && state){
-            return new SuccessResponseData(901, "账号被锁定", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
 
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatCheck.getEmail());
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
         if (null == chatGptUserInfo) {
-            return new SuccessResponseData(904, "用户不存在，请先注册", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.USER_IS_EXIST);
         }
         if (chatGptUserInfo.getState() == 1) {
-            return new SuccessResponseData(901, "账号被锁定", null);
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
         // TODO 后续加上聊天信息过滤
         // mj绘画
         if (chatCheck.getUserInput().startsWith("/mj")){
             if (chatGptUserInfo.getDrawNum() < 1){
-                return new SuccessResponseData(903, "因为资源有限，本项目完全免费，所以绘画每天限制3次，请明天再来！", null);
+                throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "绘画", 3);
             }
             chatGptUserInfo.setDrawNum(chatGptUserInfo.getDrawNum() - 1);
         }else {
             if (chatGptUserInfo.getChatNum() < 1){
-                return new SuccessResponseData(903, "因为资源有限，本项目完全免费，所以对话每天限制20次，请明天再来！", null);
+                throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "对话", 20);
             }
             chatGptUserInfo.setChatNum(chatGptUserInfo.getChatNum() - 1);
         }
         this.updateById(chatGptUserInfo);
-        return new SuccessResponseData();
     }
 
     /**

@@ -105,7 +105,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData register(ChatRegister chatRegister);
+    void register(ChatRegister chatRegister);
 
     /**
      * 签到
@@ -113,7 +113,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData checkIn(ChatAuth chatAuth);
+    void checkIn(ChatAuth chatAuth);
 
     /**
      * 签到
@@ -121,7 +121,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData refresh(ChatAuth chatAuth);
+    Integer refresh(ChatAuth chatAuth);
 
     /**
      * 发送邮件
@@ -129,7 +129,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData sendEmail(ChatAuth chatAuthParam);
+    void sendEmail(ChatAuth chatAuthParam);
 
     /**
      * 登陆
@@ -137,7 +137,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData login(ChatAuth chatAuthParam);
+    void login(ChatAuth chatAuthParam);
 
     /**
      * 用户校验
@@ -145,5 +145,5 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    ResponseData check(ChatCheck chatCheck);
+    void check(ChatCheck chatCheck);
 }

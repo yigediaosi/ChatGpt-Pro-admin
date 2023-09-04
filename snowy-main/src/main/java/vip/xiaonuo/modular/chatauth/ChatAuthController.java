@@ -32,26 +32,30 @@ public class ChatAuthController {
     @PostMapping("/sendEmail")
     @ResponseBody
     public ResponseData sendEmail(@RequestBody ChatAuth chatAuthParam) {
-        return chatGptUserInfoService.sendEmail(chatAuthParam);
+        chatGptUserInfoService.sendEmail(chatAuthParam);
+        return new SuccessResponseData();
     }
 
 
     @PostMapping("/login")
     @ResponseBody
     public ResponseData login(@RequestBody ChatAuth chatAuthParam) {
-        return chatGptUserInfoService.login(chatAuthParam);
+        chatGptUserInfoService.login(chatAuthParam);
+        return new SuccessResponseData();
     }
 
     @PostMapping("/register")
     @ResponseBody
     public ResponseData register(@RequestBody ChatRegister chatRegister) {
-        return chatGptUserInfoService.register(chatRegister);
+        chatGptUserInfoService.register(chatRegister);
+        return new SuccessResponseData();
     }
 
     @PostMapping("/check")
     @ResponseBody
     public ResponseData check(@RequestBody ChatCheck chatCheck) {
-        return chatGptUserInfoService.check(chatCheck);
+        chatGptUserInfoService.check(chatCheck);
+        return new SuccessResponseData();
     }
 
 
@@ -69,14 +73,14 @@ public class ChatAuthController {
     @ResponseBody
     public ResponseData checkIn(@RequestBody ChatAuth chat) {
 
-        return chatGptUserInfoService.checkIn(chat);
+        chatGptUserInfoService.checkIn(chat);
+        return new SuccessResponseData();
     }
 
     @PostMapping("/refresh")
     @ResponseBody
     public ResponseData refresh(@RequestBody ChatAuth chat) {
-
-        return chatGptUserInfoService.refresh(chat);
+        return new SuccessResponseData(chatGptUserInfoService.refresh(chat));
     }
 
 }
