@@ -311,10 +311,6 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
 
     @Override
     public void check(ChatCheck chatCheck) {
-        Boolean state = (Boolean) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatCheck.getEmail());
-        if (null != state && state){
-            throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
-        }
 
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
                 .eq(ChatGptUserInfo::getEmail, chatCheck.getEmail());

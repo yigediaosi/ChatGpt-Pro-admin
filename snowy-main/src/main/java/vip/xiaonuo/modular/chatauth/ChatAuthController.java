@@ -51,6 +51,12 @@ public class ChatAuthController {
         return new SuccessResponseData();
     }
 
+
+    /**
+     * 聊天校验
+     * @param chatCheck
+     * @return
+     */
     @PostMapping("/check")
     @ResponseBody
     public ResponseData check(@RequestBody ChatCheck chatCheck) {
@@ -59,6 +65,11 @@ public class ChatAuthController {
     }
 
 
+    /**
+     * 获取用户信息
+     * @param chat
+     * @return
+     */
     @PostMapping("/getUserInfo")
     @ResponseBody
     public ResponseData userInfo(@RequestBody ChatAuth chat) {
@@ -69,14 +80,23 @@ public class ChatAuthController {
         return new SuccessResponseData(resp);
     }
 
+    /**
+     * 签到
+     * @param chat
+     * @return
+     */
     @PostMapping("/checkIn")
     @ResponseBody
     public ResponseData checkIn(@RequestBody ChatAuth chat) {
-
         chatGptUserInfoService.checkIn(chat);
         return new SuccessResponseData();
     }
 
+    /**
+     * 刷新积分
+     * @param chat
+     * @return
+     */
     @PostMapping("/refresh")
     @ResponseBody
     public ResponseData refresh(@RequestBody ChatAuth chat) {
