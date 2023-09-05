@@ -201,7 +201,8 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     }
 
     @Override
-    public void checkIn(ChatAuth chatAuth) {
+    public Integer checkIn(ChatAuth chatAuth) {
+        Integer currentIntegral = 0;
         String code = (String) redisTemplate.opsForValue().get(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail());
         if (StringUtils.isNotBlank(code)){
             throw new ServiceException(ChatGptUserInfoExceptionEnum.SIGNED_IN);
@@ -225,11 +226,14 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         }
         chatGptUserInfo.setCheckinTime(new Date());
         // 每次签到+5
+        currentIntegral = chatGptUserInfo.getIntegral() + 5;
         chatGptUserInfo.setIntegral(chatGptUserInfo.getIntegral() + 5);
 
         long midnightSeconds = calculateSecondsUntilMidnight();
 
         redisTemplate.opsForValue().set(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail(), "signed" , midnightSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(CommonConstant.CHAT_USER_INFO + chatAuth.getEmail(), chatGptUserInfo, 5 * 60, TimeUnit.SECONDS);
+        return currentIntegral;
     }
 
     /**
@@ -321,18 +325,29 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         if (chatGptUserInfo.getState() == 1) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
-        // TODO 后续加上聊天信息过滤
-        // mj绘画
-        if (chatCheck.getUserInput().startsWith("/mj")){
-            if (chatGptUserInfo.getDrawNum() < 1){
-                throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "绘画", 3);
+        // 如果积分是0则扣次数，否则优先扣积分
+        if (chatGptUserInfo.getIntegral() < 1){
+            // TODO 后续加上聊天信息过滤
+            // mj绘画
+            if (chatCheck.getUserInput().startsWith("/mj")){
+                if (chatGptUserInfo.getDrawNum() < 1){
+                    throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "绘画", 3);
+                }
+                chatGptUserInfo.setDrawNum(chatGptUserInfo.getDrawNum() - 1);
+            }else {
+                if (chatGptUserInfo.getChatNum() < 1){
+                    throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "对话", 20);
+                }
+                chatGptUserInfo.setChatNum(chatGptUserInfo.getChatNum() - 1);
             }
-            chatGptUserInfo.setDrawNum(chatGptUserInfo.getDrawNum() - 1);
         }else {
-            if (chatGptUserInfo.getChatNum() < 1){
-                throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "对话", 20);
+            if (chatCheck.getUserInput().startsWith("/mj")){
+                // 每次绘画扣5分
+                chatGptUserInfo.setIntegral(chatGptUserInfo.getDrawNum() - 5);
+            }else {
+                // 每次聊天扣1分
+                chatGptUserInfo.setIntegral(chatGptUserInfo.getDrawNum() - 1);
             }
-            chatGptUserInfo.setChatNum(chatGptUserInfo.getChatNum() - 1);
         }
         this.updateById(chatGptUserInfo);
     }

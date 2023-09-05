@@ -113,7 +113,7 @@ public interface ChatGptUserInfoService extends IService<ChatGptUserInfo> {
      * @author 981743898@qq.com
      * @date 2023-08-21 21:49:44
      */
-    void checkIn(ChatAuth chatAuth);
+    Integer checkIn(ChatAuth chatAuth);
 
     /**
      * 签到

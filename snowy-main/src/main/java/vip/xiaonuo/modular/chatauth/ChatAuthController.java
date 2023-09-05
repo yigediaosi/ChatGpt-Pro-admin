@@ -88,8 +88,7 @@ public class ChatAuthController {
     @PostMapping("/checkIn")
     @ResponseBody
     public ResponseData checkIn(@RequestBody ChatAuth chat) {
-        chatGptUserInfoService.checkIn(chat);
-        return new SuccessResponseData();
+        return new SuccessResponseData(chatGptUserInfoService.checkIn(chat));
     }
 
     /**
