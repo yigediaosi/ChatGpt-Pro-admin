@@ -170,7 +170,8 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             throw new ServiceException(ChatGptUserInfoExceptionEnum.EMAIL_IS_EXIST);
         }
 
-        // 邀请码不为空 增加邀请人积分
+        Integer integral = 0;
+        // 邀请码不为空 双方各加15分
         if (StringUtils.isNotBlank(chatRegister.getInviteCode())){
             LambdaQueryWrapper<ChatGptUserInfo> queryWrapper2 = new LambdaQueryWrapper<ChatGptUserInfo>()
                     .eq(ChatGptUserInfo::getInviteCode, chatRegister.getInviteCode());
@@ -179,19 +180,18 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
                 throw new ServiceException(ChatGptUserInfoExceptionEnum.INVITATION_CODE_IS_NOT_EXIST);
             }
             ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
-            // 暂定每次邀请+20积分
-            chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + 20);
+            chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + 15);
             this.updateById(chatGptUserInfo2);
-
+            integral = 15;
         }
         ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
-        chatGptUserInfoParam.setChatNum(20);
-        chatGptUserInfoParam.setDrawNum(3);
+//        chatGptUserInfoParam.setChatNum(20);
+//        chatGptUserInfoParam.setDrawNum(3);
         chatGptUserInfoParam.setEmail(chatRegister.getEmail());
         String iCode = IdGen.getUUID(6);
         chatGptUserInfoParam.setInviteCode(iCode);
 
-        chatGptUserInfoParam.setIntegral(20);
+        chatGptUserInfoParam.setIntegral(integral + 15);
         //用户名密码暂时用不到，目前使用邮箱+验证码登陆
         chatGptUserInfoParam.setName("用户" + iCode);
         String passEnc = AESUtil.encrypt(chatRegister.getPassword());
