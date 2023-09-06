@@ -228,9 +228,9 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         // 每次签到+5
         currentIntegral = chatGptUserInfo.getIntegral() + 5;
         chatGptUserInfo.setIntegral(chatGptUserInfo.getIntegral() + 5);
+        this.updateById(chatGptUserInfo);
 
         long midnightSeconds = calculateSecondsUntilMidnight();
-
         redisTemplate.opsForValue().set(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail(), "signed" , midnightSeconds, TimeUnit.SECONDS);
         redisTemplate.opsForValue().set(CommonConstant.CHAT_USER_INFO + chatAuth.getEmail(), chatGptUserInfo, 5 * 60, TimeUnit.SECONDS);
         return currentIntegral;
