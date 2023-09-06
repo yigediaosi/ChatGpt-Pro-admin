@@ -85,4 +85,9 @@ public class ChatGptUserInfoParam extends BaseParam {
     @NotNull(message = "状态不能为空，请检查state参数", groups = {add.class, edit.class})
     private Integer state;
 
+    /**
+     * 被邀请人
+     */
+    private String invitedEmail;
+
 }

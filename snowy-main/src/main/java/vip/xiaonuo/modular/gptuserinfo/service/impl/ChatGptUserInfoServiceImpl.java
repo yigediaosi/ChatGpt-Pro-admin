@@ -171,7 +171,9 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             throw new ServiceException(ChatGptUserInfoExceptionEnum.EMAIL_IS_EXIST);
         }
 
+
         Integer integral = 0;
+        String invitedEmail = "";
         // 邀请码不为空 邀请人+10 被邀请人+5
         if (StringUtils.isNotBlank(chatRegister.getInviteCode())) {
             integral = 10;
@@ -183,6 +185,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             }
             ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
             chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + integral);
+            invitedEmail = chatGptUserInfo2.getEmail();
             this.updateById(chatGptUserInfo2);
 
         }
@@ -197,6 +200,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         String passEnc = AESUtil.encrypt(chatRegister.getPassword());
         chatGptUserInfoParam.setPassword(passEnc);
         chatGptUserInfoParam.setState(0);
+        chatGptUserInfoParam.setInvitedEmail(invitedEmail);
         this.add(chatGptUserInfoParam);
     }
 
