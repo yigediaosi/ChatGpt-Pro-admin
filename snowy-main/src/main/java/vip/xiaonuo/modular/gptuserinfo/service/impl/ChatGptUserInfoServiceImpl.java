@@ -52,6 +52,7 @@ import vip.xiaonuo.modular.gptuserinfo.service.ChatGptUserInfoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vip.xiaonuo.sys.modular.email.enums.SysEmailExceptionEnum;
+
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -127,7 +128,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     @Override
     public void delete(List<ChatGptUserInfoParam> chatGptUserInfoParamList) {
         chatGptUserInfoParamList.forEach(chatGptUserInfoParam -> {
-        ChatGptUserInfo chatGptUserInfo = this.queryChatGptUserInfo(chatGptUserInfoParam);
+            ChatGptUserInfo chatGptUserInfo = this.queryChatGptUserInfo(chatGptUserInfoParam);
             this.removeById(chatGptUserInfo.getId());
         });
     }
@@ -171,27 +172,26 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         }
 
         Integer integral = 0;
-        // 邀请码不为空 双方各加15分
-        if (StringUtils.isNotBlank(chatRegister.getInviteCode())){
+        // 邀请码不为空 邀请人+10 被邀请人+5
+        if (StringUtils.isNotBlank(chatRegister.getInviteCode())) {
+            integral = 10;
             LambdaQueryWrapper<ChatGptUserInfo> queryWrapper2 = new LambdaQueryWrapper<ChatGptUserInfo>()
                     .eq(ChatGptUserInfo::getInviteCode, chatRegister.getInviteCode());
             ChatGptUserInfo chatGptUserInfo2 = this.getOne(queryWrapper2);
-            if (null == chatGptUserInfo2){
+            if (null == chatGptUserInfo2) {
                 throw new ServiceException(ChatGptUserInfoExceptionEnum.INVITATION_CODE_IS_NOT_EXIST);
             }
             ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
-            chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + 15);
+            chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + integral);
             this.updateById(chatGptUserInfo2);
-            integral = 15;
+
         }
         ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
-//        chatGptUserInfoParam.setChatNum(20);
-//        chatGptUserInfoParam.setDrawNum(3);
         chatGptUserInfoParam.setEmail(chatRegister.getEmail());
         String iCode = IdGen.getUUID(6);
         chatGptUserInfoParam.setInviteCode(iCode);
 
-        chatGptUserInfoParam.setIntegral(integral + 15);
+        chatGptUserInfoParam.setIntegral(integral > 0 ? 5 : 0 + 10);
         //用户名密码暂时用不到，目前使用邮箱+验证码登陆
         chatGptUserInfoParam.setName("用户" + iCode);
         String passEnc = AESUtil.encrypt(chatRegister.getPassword());
@@ -202,9 +202,8 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
 
     @Override
     public Integer checkIn(ChatAuth chatAuth) {
-        Integer currentIntegral = 0;
         String code = (String) redisTemplate.opsForValue().get(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail());
-        if (StringUtils.isNotBlank(code)){
+        if (StringUtils.isNotBlank(code)) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.SIGNED_IN);
         }
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
@@ -213,7 +212,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         if (null == chatGptUserInfo) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.USER_IS_EXIST);
         }
-        if (null != chatGptUserInfo.getCheckinTime()){
+        if (null != chatGptUserInfo.getCheckinTime()) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             // 获取当前日期
             Date currentDate = new Date();
@@ -226,18 +225,19 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         }
         chatGptUserInfo.setCheckinTime(new Date());
         // 每次签到+5
-        currentIntegral = chatGptUserInfo.getIntegral() + 5;
+        Integer currentIntegral = chatGptUserInfo.getIntegral() + 5;
         chatGptUserInfo.setIntegral(chatGptUserInfo.getIntegral() + 5);
         this.updateById(chatGptUserInfo);
 
         long midnightSeconds = calculateSecondsUntilMidnight();
-        redisTemplate.opsForValue().set(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail(), "signed" , midnightSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(CommonConstant.CHAT_SIGN_IN + chatAuth.getEmail(), "signed", midnightSeconds, TimeUnit.SECONDS);
         redisTemplate.opsForValue().set(CommonConstant.CHAT_USER_INFO + chatAuth.getEmail(), chatGptUserInfo, 5 * 60, TimeUnit.SECONDS);
         return currentIntegral;
     }
 
     /**
      * 计算距离凌晨12点的剩余时间（以秒为单位）
+     *
      * @return
      */
     private long calculateSecondsUntilMidnight() {
@@ -262,7 +262,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     @Override
     public void sendEmail(ChatAuth chatAuthParam) {
         Integer code = (Integer) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH + chatAuthParam.getEmail());
-        if (null != code){
+        if (null != code) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.SEND_FREQUENTLY);
         }
         if (ObjectUtil.isEmpty(chatAuthParam.getEmail())) {
@@ -283,7 +283,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
     @Override
     public void login(ChatAuth chatAuthParam) {
         Boolean state = (Boolean) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH_LOGIN_STATE + chatAuthParam.getEmail());
-        if (null != state && state){
+        if (null != state && state) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
         LambdaQueryWrapper<ChatGptUserInfo> queryWrapper = new LambdaQueryWrapper<ChatGptUserInfo>()
@@ -325,31 +325,28 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         if (chatGptUserInfo.getState() == 1) {
             throw new ServiceException(ChatGptUserInfoExceptionEnum.ACCOUNT_IS_LOCK);
         }
-        // 如果积分是0则扣次数，否则优先扣积分
-        if (chatGptUserInfo.getIntegral() < 1){
-            // TODO 后续加上聊天信息过滤
-            // mj绘画
-            if (chatCheck.getUserInput().startsWith("/mj")){
-                if (chatGptUserInfo.getDrawNum() < 1){
-                    throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "绘画", 3);
-                }
-                chatGptUserInfo.setDrawNum(chatGptUserInfo.getDrawNum() - 1);
-            }else {
-                if (chatGptUserInfo.getChatNum() < 1){
-                    throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "对话", 20);
-                }
-                chatGptUserInfo.setChatNum(chatGptUserInfo.getChatNum() - 1);
-            }
-        }else {
-            if (chatCheck.getUserInput().startsWith("/mj")){
-                // 每次绘画扣5分
-                chatGptUserInfo.setIntegral(chatGptUserInfo.getDrawNum() - 5);
-            }else {
-                // 每次聊天扣1分
-                chatGptUserInfo.setIntegral(chatGptUserInfo.getDrawNum() - 1);
-            }
+        // 校验绘画/对话次数
+        check(chatGptUserInfo, chatCheck.getUserInput().startsWith("/mj") ? true : false);
+
+        // TODO 后续加上聊天信息过滤
+        if (chatCheck.getUserInput().startsWith("/mj")) {
+            // 每次绘画扣5分
+            chatGptUserInfo.setIntegral(chatGptUserInfo.getIntegral() - 5);
+        } else {
+            // 每次聊天扣1分
+            chatGptUserInfo.setIntegral(chatGptUserInfo.getIntegral() - 1);
         }
+
         this.updateById(chatGptUserInfo);
+    }
+
+    private void check(ChatGptUserInfo chatGptUserInfo, boolean isDraw) {
+        if (isDraw && chatGptUserInfo.getIntegral() < 5) {
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "绘画", 2);
+        }
+        if (chatGptUserInfo.getIntegral() < 1) {
+            throw new ServiceException(ChatGptUserInfoExceptionEnum.LIMITED_RESOURCES, "对话", 10);
+        }
     }
 
     /**

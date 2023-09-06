@@ -51,8 +51,9 @@ public enum ChatGptUserInfoExceptionEnum implements AbstractBaseExceptionEnum {
     PASS_ERROR_TIME(905, "账密或密码错误，剩余[{0}]次机会"),
 
     INVITATION_CODE_IS_NOT_EXIST(906, "邀请码不存在"),
-    LIMITED_RESOURCES(907, "因为资源有限，本项目完全免费，所以{0}每天限制{1}次，请明天再来！"),
+    LIMITED_RESOURCES(907, "因为资源有限，本项目完全免费，所以{0}每天限制{1}次，请明天再来~"),
     SIGNED_IN(908, "今天已经签过到了~"),
+    DRAW_ERROR(909, "积分不足{0}，请明日再来~"),
 
     ;
 
