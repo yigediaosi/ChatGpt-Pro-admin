@@ -24,20 +24,19 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
  */
 package vip.xiaonuo.modular.gptuserinfo.param;
 
-import vip.xiaonuo.core.pojo.base.param.BaseParam;
 import lombok.Data;
-import javax.validation.constraints.NotNull;
+import vip.xiaonuo.core.pojo.base.param.BaseParam;
 import javax.validation.constraints.NotBlank;
-import java.util.*;
+import javax.validation.constraints.NotNull;
 
 /**
-* 会员信息参数类
  *
+ * 邀请信息
  * @author 981743898@qq.com
- * @date 2023-08-21 21:49:44
+ * @date 2023-08-21 21:49:11
 */
 @Data
-public class ChatGptUserInfoParam extends BaseParam {
+public class InviteRecordParam extends BaseParam {
 
     /**
      * 
@@ -51,39 +50,5 @@ public class ChatGptUserInfoParam extends BaseParam {
     @NotBlank(message = "邮箱不能为空，请检查email参数", groups = {add.class, edit.class})
     private String email;
 
-    /**
-     * 登录名
-     */
-    private String name;
-
-    /**
-     * 密码
-     */
-    private String password;
-
-    /**
-     * 邀请码
-     */
-    private String inviteCode;
-
-    private Integer integral;
-    /**
-     * 剩余聊天次数
-     */
-    @NotNull(message = "剩余聊天次数不能为空，请检查chatNum参数", groups = {add.class, edit.class})
-    private Integer chatNum;
-
-    /**
-     * 剩余绘画次数
-     */
-    @NotNull(message = "剩余绘画次数不能为空，请检查drawNum参数", groups = {add.class, edit.class})
-    private Integer drawNum;
-
-    /**
-     * 状态 0正常 1封禁
-     */
-    @NotNull(message = "状态不能为空，请检查state参数", groups = {add.class, edit.class})
-    private Integer state;
-
-
+    private String invitedEmail;
 }

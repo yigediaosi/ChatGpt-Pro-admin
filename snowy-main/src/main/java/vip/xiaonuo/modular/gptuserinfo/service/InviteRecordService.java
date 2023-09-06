@@ -22,52 +22,52 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
 5.在修改包名，模块名称，项目代码等时，请注明软件出处 https://gitee.com/xiaonuobase/snowy-layui
 6.若您的项目无法满足以上几点，可申请商业授权，获取Snowy商业授权许可，请在官网购买授权，地址为 https://www.xiaonuo.vip
  */
-package vip.xiaonuo.modular.gptuserinfo.entity;
+package vip.xiaonuo.modular.gptuserinfo.service;
 
-import lombok.Data;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.extension.service.IService;
+import vip.xiaonuo.core.pojo.login.ChatAuth;
+import vip.xiaonuo.core.pojo.login.ChatCheck;
+import vip.xiaonuo.core.pojo.login.ChatRegister;
+import vip.xiaonuo.core.pojo.page.PageResult;
+import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
+import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
+import vip.xiaonuo.modular.gptuserinfo.entity.InviteRecord;
+import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
+import vip.xiaonuo.modular.gptuserinfo.param.InviteRecordParam;
+
 import java.util.List;
 
 /**
- * 会员信息
+ * 邀请信息
  *
  * @author 981743898@qq.com
- * @date 2023-08-21 21:49:44
+ * @date 2023-09-06 21:49:44
  */
-
-@Data
-public class ChatGptUserInfoResp implements Serializable {
-
-
+public interface InviteRecordService extends IService<InviteRecord> {
 
     /**
-     * 邮箱
+     * 查询邀请信息
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
      */
-    private String email;
+    PageResult<InviteRecord> page(InviteRecordParam inviteRecordParam);
 
     /**
-     * 邀请码
+     * 邀请信息列表
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
      */
-    private String inviteCode;
+    List<InviteRecord> list(InviteRecordParam inviteRecordParam);
 
     /**
-     * 剩余聊天次数
+     * 邀请信息信息
+     *
+     * @author 981743898@qq.com
+     * @date 2023-08-21 21:49:44
      */
-    private Integer chatNum;
+    void add(InviteRecordParam inviteRecordParam);
 
-    /**
-     * 剩余绘画次数
-     */
-    private Integer drawNum;
-
-    /**
-     * 积分
-     */
-    private Integer integral;
-
-    /**
-     * 邀请人数
-     */
-    private Integer inviteRecordCount;
 
 }

@@ -22,68 +22,41 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
 5.在修改包名，模块名称，项目代码等时，请注明软件出处 https://gitee.com/xiaonuobase/snowy-layui
 6.若您的项目无法满足以上几点，可申请商业授权，获取Snowy商业授权许可，请在官网购买授权，地址为 https://www.xiaonuo.vip
  */
-package vip.xiaonuo.modular.gptuserinfo.param;
+package vip.xiaonuo.modular.gptuserinfo.entity;
 
-import vip.xiaonuo.core.pojo.base.param.BaseParam;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotBlank;
-import java.util.*;
+import lombok.EqualsAndHashCode;
+import vip.xiaonuo.core.pojo.base.entity.BaseEntity;
 
 /**
-* 会员信息参数类
+ * 邀请信息
  *
  * @author 981743898@qq.com
  * @date 2023-08-21 21:49:44
-*/
+ */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ChatGptUserInfoParam extends BaseParam {
+@TableName("invite_record")
+public class InviteRecord extends BaseEntity {
 
     /**
      * 
      */
-    @NotNull(message = "不能为空，请检查id参数", groups = {edit.class, delete.class, detail.class})
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 邮箱
+     * 邀请人
      */
-    @NotBlank(message = "邮箱不能为空，请检查email参数", groups = {add.class, edit.class})
     private String email;
 
     /**
-     * 登录名
+     * 被邀请人
      */
-    private String name;
-
-    /**
-     * 密码
-     */
-    private String password;
-
-    /**
-     * 邀请码
-     */
-    private String inviteCode;
-
-    private Integer integral;
-    /**
-     * 剩余聊天次数
-     */
-    @NotNull(message = "剩余聊天次数不能为空，请检查chatNum参数", groups = {add.class, edit.class})
-    private Integer chatNum;
-
-    /**
-     * 剩余绘画次数
-     */
-    @NotNull(message = "剩余绘画次数不能为空，请检查drawNum参数", groups = {add.class, edit.class})
-    private Integer drawNum;
-
-    /**
-     * 状态 0正常 1封禁
-     */
-    @NotNull(message = "状态不能为空，请检查state参数", groups = {add.class, edit.class})
-    private Integer state;
+    private String invitedEmail;
 
 
 }

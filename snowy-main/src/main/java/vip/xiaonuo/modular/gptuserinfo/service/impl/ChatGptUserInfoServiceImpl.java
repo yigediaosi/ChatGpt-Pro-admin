@@ -45,12 +45,15 @@ import vip.xiaonuo.core.util.AESUtil;
 import vip.xiaonuo.core.util.IdGen;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfo;
 import vip.xiaonuo.modular.gptuserinfo.entity.ChatGptUserInfoResp;
+import vip.xiaonuo.modular.gptuserinfo.entity.InviteRecord;
 import vip.xiaonuo.modular.gptuserinfo.enums.ChatGptUserInfoExceptionEnum;
 import vip.xiaonuo.modular.gptuserinfo.mapper.ChatGptUserInfoMapper;
 import vip.xiaonuo.modular.gptuserinfo.param.ChatGptUserInfoParam;
+import vip.xiaonuo.modular.gptuserinfo.param.InviteRecordParam;
 import vip.xiaonuo.modular.gptuserinfo.service.ChatGptUserInfoService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vip.xiaonuo.modular.gptuserinfo.service.InviteRecordService;
 import vip.xiaonuo.sys.modular.email.enums.SysEmailExceptionEnum;
 
 import javax.annotation.Resource;
@@ -59,6 +62,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 会员信息service接口实现类
@@ -74,6 +78,9 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
 
     @Resource
     private MailSender mailSender;
+
+    @Resource
+    private InviteRecordService inviteRecordService;
 
     @Override
     public PageResult<ChatGptUserInfo> page(ChatGptUserInfoParam chatGptUserInfoParam) {
@@ -153,11 +160,50 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         ChatGptUserInfo chatGptUserInfo = this.getOne(queryWrapper);
         ChatGptUserInfoResp resp = new ChatGptUserInfoResp();
         BeanUtils.copyProperties(chatGptUserInfo, resp);
+        LambdaQueryWrapper<InviteRecord> inviteRecordLambdaQueryWrapper = new LambdaQueryWrapper<InviteRecord>()
+                .eq(InviteRecord::getEmail, email);
+        resp.setInviteRecordCount(inviteRecordService.count(inviteRecordLambdaQueryWrapper));
         redisTemplate.opsForValue().set(CommonConstant.CHAT_USER_INFO + email, resp, 5 * 60, TimeUnit.SECONDS);
         return resp;
     }
 
+
+    // 脱敏邮箱
+    private String maskEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return email;
+        }
+
+        String[] parts = email.split("@");
+        if (parts.length != 2) {
+            // 不是有效的邮箱地址，不进行脱敏
+            return email;
+        }
+
+        String username = parts[0];
+        String domain = parts[1];
+
+        if (username.length() <= 2) {
+            // 用户名太短，不进行脱敏
+            return email;
+        }
+
+        // 脱敏处理用户名部分
+        StringBuilder maskedUsername = new StringBuilder();
+        maskedUsername.append(username.charAt(0));
+        // 保留第一个字符
+        for (int i = 1; i < username.length() - 1; i++) {
+            // 用星号替代中间字符
+            maskedUsername.append('*');
+        }
+        // 保留最后一个字符
+        maskedUsername.append(username.charAt(username.length() - 1));
+
+        return maskedUsername.toString() + "@" + domain;
+    }
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void register(ChatRegister chatRegister) {
         Integer code = (Integer) redisTemplate.opsForValue().get(CommonConstant.CHAT_AUTH + chatRegister.getEmail());
 
@@ -171,9 +217,7 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             throw new ServiceException(ChatGptUserInfoExceptionEnum.EMAIL_IS_EXIST);
         }
 
-
         Integer integral = 0;
-        String invitedEmail = "";
         // 邀请码不为空 邀请人+10 被邀请人+5
         if (StringUtils.isNotBlank(chatRegister.getInviteCode())) {
             integral = 10;
@@ -185,9 +229,12 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
             }
             ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
             chatGptUserInfoParam.setIntegral(chatGptUserInfoParam.getIntegral() + integral);
-            invitedEmail = chatGptUserInfo2.getEmail();
             this.updateById(chatGptUserInfo2);
-
+            // 新增邀请记录
+            InviteRecordParam inviteRecordParam = new InviteRecordParam();
+            inviteRecordParam.setEmail(chatGptUserInfo2.getEmail());
+            inviteRecordParam.setInvitedEmail(chatRegister.getEmail());
+            inviteRecordService.add(inviteRecordParam);
         }
         ChatGptUserInfoParam chatGptUserInfoParam = new ChatGptUserInfoParam();
         chatGptUserInfoParam.setEmail(chatRegister.getEmail());
@@ -200,7 +247,6 @@ public class ChatGptUserInfoServiceImpl extends ServiceImpl<ChatGptUserInfoMappe
         String passEnc = AESUtil.encrypt(chatRegister.getPassword());
         chatGptUserInfoParam.setPassword(passEnc);
         chatGptUserInfoParam.setState(0);
-        chatGptUserInfoParam.setInvitedEmail(invitedEmail);
         this.add(chatGptUserInfoParam);
     }
 

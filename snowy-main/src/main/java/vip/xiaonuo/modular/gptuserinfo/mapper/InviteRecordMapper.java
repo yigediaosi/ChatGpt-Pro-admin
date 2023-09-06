@@ -22,52 +22,16 @@ Snowy采用APACHE LICENSE 2.0开源协议，您在使用过程中，需要注意
 5.在修改包名，模块名称，项目代码等时，请注明软件出处 https://gitee.com/xiaonuobase/snowy-layui
 6.若您的项目无法满足以上几点，可申请商业授权，获取Snowy商业授权许可，请在官网购买授权，地址为 https://www.xiaonuo.vip
  */
-package vip.xiaonuo.modular.gptuserinfo.entity;
+package vip.xiaonuo.modular.gptuserinfo.mapper;
 
-import lombok.Data;
-import java.io.Serializable;
-import java.util.List;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import vip.xiaonuo.modular.gptuserinfo.entity.InviteRecord;
 
 /**
- * 会员信息
+ * 邀请信息
  *
  * @author 981743898@qq.com
- * @date 2023-08-21 21:49:44
+ * @date 2023-08-21 21:11:11
  */
-
-@Data
-public class ChatGptUserInfoResp implements Serializable {
-
-
-
-    /**
-     * 邮箱
-     */
-    private String email;
-
-    /**
-     * 邀请码
-     */
-    private String inviteCode;
-
-    /**
-     * 剩余聊天次数
-     */
-    private Integer chatNum;
-
-    /**
-     * 剩余绘画次数
-     */
-    private Integer drawNum;
-
-    /**
-     * 积分
-     */
-    private Integer integral;
-
-    /**
-     * 邀请人数
-     */
-    private Integer inviteRecordCount;
-
+public interface InviteRecordMapper extends BaseMapper<InviteRecord> {
 }
