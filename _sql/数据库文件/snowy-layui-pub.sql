@@ -1080,4 +1080,43 @@ CREATE TABLE `sys_vis_log`  (
 -- Records of sys_vis_log
 -- ----------------------------
 
+
+
+-- `snowy-layui-pub`.chat_gpt_user_info definition
+
+CREATE TABLE `chat_gpt_user_info` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL COMMENT '邮箱',
+  `name` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '登录名',
+  `password` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '密码',
+  `invite_code` varchar(20) DEFAULT NULL COMMENT '邀请码',
+  `invited_email` varchar(100) DEFAULT NULL COMMENT '被邀请人',
+  `chat_num` int(11) DEFAULT '0' COMMENT '剩余聊天次数',
+  `draw_num` int(11) DEFAULT '0' COMMENT '剩余绘画次数',
+  `integral` int(11) DEFAULT '0' COMMENT '积分',
+  `state` tinyint(2) DEFAULT '0' COMMENT '状态 0正常 1封禁',
+  `last_login_time` datetime DEFAULT NULL COMMENT '登录时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_user` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `update_user` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `checkin_time` datetime DEFAULT NULL COMMENT '签到时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `chat_gpt_user_info_invite_code_IDX` (`invite_code`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4;
+
+-- `snowy-layui-pub`.invite_record definition
+
+CREATE TABLE `invite_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL COMMENT '邀请人邮箱邮箱',
+  `invited_email` varchar(100) DEFAULT NULL COMMENT '被邀请人',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `create_user` bigint(20) DEFAULT NULL COMMENT '创建人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `update_user` bigint(20) DEFAULT NULL COMMENT '更新人',
+  `checkin_time` datetime DEFAULT NULL COMMENT '签到时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 SET FOREIGN_KEY_CHECKS = 1;
