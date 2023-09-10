@@ -6,7 +6,7 @@ server:
 #spring相关配置
 spring:
   profiles:
-    active: @spring.active@
+    active: local
   servlet:
     multipart:
       #文件最大上传大小配置 最大上传100M
