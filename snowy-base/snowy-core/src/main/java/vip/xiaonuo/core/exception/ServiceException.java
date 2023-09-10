@@ -28,6 +28,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import vip.xiaonuo.core.exception.enums.abs.AbstractBaseExceptionEnum;
 
+import java.text.MessageFormat;
+
 /**
  * 业务异常
  *
@@ -52,5 +54,11 @@ public class ServiceException extends RuntimeException {
         super(exception.getMessage());
         this.code = exception.getCode();
         this.errorMessage = exception.getMessage();
+    }
+
+    public ServiceException(AbstractBaseExceptionEnum exception, Object... args) {
+        super(exception.getMessage());
+        this.code = exception.getCode();
+        this.errorMessage = MessageFormat.format(exception.getMessage(), args);;
     }
 }

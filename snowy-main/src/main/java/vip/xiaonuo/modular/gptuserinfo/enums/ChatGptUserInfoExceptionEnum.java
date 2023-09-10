@@ -41,12 +41,27 @@ public enum ChatGptUserInfoExceptionEnum implements AbstractBaseExceptionEnum {
     /**
      * 数据不存在
      */
-    NOT_EXIST(1, "此数据不存在");
+    NOT_EXIST(1, "此数据不存在"),
+
+    CODE_IS_EXPIRE(900, "验证码已失效或发送失败，请重新获取验证码"),
+    EMAIL_IS_EXIST(901, "邮箱已注册"),
+    SEND_FREQUENTLY(902, "发送过于频繁，请等待1分钟后再试"),
+    ACCOUNT_IS_LOCK(903, "账号被锁定"),
+    USER_IS_EXIST(904, "用户不存在，请先注册"),
+    PASS_ERROR_TIME(905, "账密或密码错误，剩余[{0}]次机会"),
+
+    INVITATION_CODE_IS_NOT_EXIST(906, "邀请码不存在"),
+    LIMITED_RESOURCES(907, "因为资源有限，本项目完全免费，所以{0}每天限制{1}次，请明天再来~"),
+    SIGNED_IN(908, "今天已经签过到了~"),
+    DRAW_ERROR(909, "积分不足{0}，请明日再来~"),
+
+    ;
 
     private final Integer code;
 
     private final String message;
-        ChatGptUserInfoExceptionEnum(Integer code, String message) {
+
+    ChatGptUserInfoExceptionEnum(Integer code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -58,7 +73,7 @@ public enum ChatGptUserInfoExceptionEnum implements AbstractBaseExceptionEnum {
 
     @Override
     public String getMessage() {
-        return message;
+            return message;
     }
 
 }

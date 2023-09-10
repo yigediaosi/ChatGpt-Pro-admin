@@ -28,6 +28,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.mail.MailAccount;
 import cn.hutool.extra.mail.MailUtil;
+import com.sun.mail.util.MailSSLSocketFactory;
 import vip.xiaonuo.core.email.MailSender;
 import vip.xiaonuo.core.email.modular.exception.MailSendException;
 import vip.xiaonuo.core.email.modular.model.SendMailParam;
@@ -36,6 +37,7 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -95,6 +97,70 @@ public class SimpleMailSender implements MailSender {
         message.setSentDate(new Date());
         message.saveChanges();//保存设置
         Transport.send(message);
+
+    }
+
+    @Override
+    public void sendMailQQ(SendMailParam sendMailParam){
+        //封装配置信息
+        //实例化配置文件，也可以在外面写xxx.properties文件再引入配置
+        Properties properties = new Properties();
+        //设置QQ邮件服务器
+        properties.setProperty("mail.host","smtp.qq.com");
+        //设置邮件发送协议
+        properties.setProperty("mail.transport.protocol","smtp");
+        //需要验证用户名密码
+        properties.setProperty("mail.smtp.auth","true");
+        Transport ts = null;
+        try {
+            MailSSLSocketFactory sf = new MailSSLSocketFactory();
+            sf.setTrustAllHosts(true);
+            properties.put("mail.smtp.ssl.enable","true");
+            properties.put("mail.smtp.ssl.socketFactory",sf);
+
+            //1.创建定义整个应用程序所需的环境信息的Session对象
+            Session session = Session.getDefaultInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    //发件人邮件用户名、授权码
+                    return new PasswordAuthentication(mailAccount.getUser(), mailAccount.getPass());
+                }
+            });
+            //开启session的debug模式，这样就可以查看程序发送Email的运行状态
+            //session.setDebug(true);
+            //2.通过session得到transport对象
+            ts = session.getTransport();
+            //3.使用邮箱的用户名和授权码连上邮件服务器
+            ts.connect(mailAccount.getHost(), mailAccount.getUser(), mailAccount.getPass());
+            //4.创建邮件:写邮件
+            //注意需要传递session
+            MimeMessage message = new MimeMessage(session);
+            //指明邮件发件人
+            message.setFrom(new InternetAddress(mailAccount.getUser()));
+            //指明邮件的收件人，现在的发件人和收件人是一样，就是给自己发邮件 收件人
+            message.setRecipient(Message.RecipientType.TO,new InternetAddress(sendMailParam.getTo()));
+            //邮件的标题
+            message.setSubject(sendMailParam.getTitle());
+            //邮件的文本内容,第二个参数代表前面文本支持html标签，字符编码为utf-8
+            message.setContent(sendMailParam.getContent(),"text/html;charset=UTF-8");
+            //5.发送邮件
+            ts.sendMessage(message,message.getAllRecipients());
+
+        } catch (GeneralSecurityException | NoSuchProviderException | AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }finally {
+            //6.关闭连接
+            if ( null != ts){
+                try {
+                    ts.close();
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
     @Override

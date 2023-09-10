@@ -30,6 +30,7 @@ import vip.xiaonuo.core.email.modular.model.SendMailParam;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import java.security.GeneralSecurityException;
 
 /**
  * 邮件收发统一接口
@@ -54,6 +55,14 @@ public interface MailSender {
      * @date 2023-8-24 17:26
      */
     void sendMail163(SendMailParam sendMailParam) throws MessagingException;
+
+    /**
+     * 发送普通QQ邮件
+     *
+     * @author 981743898@qq.com
+     * @date 2023-8-24 17:26
+     */
+    void sendMailQQ(SendMailParam sendMailParam);
 
     /**
      * 发送html的邮件

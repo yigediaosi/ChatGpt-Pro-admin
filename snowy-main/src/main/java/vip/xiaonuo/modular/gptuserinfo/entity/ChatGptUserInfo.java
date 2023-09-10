@@ -79,6 +79,11 @@ public class ChatGptUserInfo extends BaseEntity {
     private Integer drawNum;
 
     /**
+     * 积分
+     */
+    private Integer integral;
+
+    /**
      * 状态
      */
     private Integer state;
@@ -86,5 +91,10 @@ public class ChatGptUserInfo extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date lastLoginTime;
 
+
+    /**
+     * 签到时间
+     */
+    private Date checkinTime;
 
 }

@@ -66,6 +66,7 @@ public class ChatGptUserInfoParam extends BaseParam {
      */
     private String inviteCode;
 
+    private Integer integral;
     /**
      * 剩余聊天次数
      */
@@ -83,5 +84,6 @@ public class ChatGptUserInfoParam extends BaseParam {
      */
     @NotNull(message = "状态不能为空，请检查state参数", groups = {add.class, edit.class})
     private Integer state;
+
 
 }
