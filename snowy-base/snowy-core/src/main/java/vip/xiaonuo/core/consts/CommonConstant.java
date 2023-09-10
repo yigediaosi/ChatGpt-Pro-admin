@@ -172,6 +172,6 @@ public interface CommonConstant {
 
     String CHAT_SIGN_IN = "CHAT_SIGN_IN|";
 
-    String AES_PASS = "9!#95hsup*&$1zq713";
+    String AES_PASS = "9!#95hsup*&$1zq7";
 
 }
