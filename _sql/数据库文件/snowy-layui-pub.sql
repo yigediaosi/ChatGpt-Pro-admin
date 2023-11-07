@@ -602,6 +602,13 @@ INSERT INTO `sys_menu` VALUES (1264622039642256731, 1264622039642256721, '[0],[1
 INSERT INTO `sys_menu` VALUES (1264622039642256741, 1264622039642256721, '[0],[1264622039642256721],', '区域选择', 'sys_area_select', 1, NULL, '/sysArea/select', NULL, 'system', 1, 100, NULL, 0, '2020-07-01 17:17:20', 1265476890672672808, NULL, NULL);
 INSERT INTO `sys_menu` VALUES (1264622039642256751, 1264622039642256731, '[0],[1264622039642256721],[1264622039642256731],', '系统区域查询', 'sys_area_mgr_page', 2, NULL, NULL, 'sysArea:page', 'system', 1, 100, NULL, 0, '2020-07-01 17:19:43', 1265476890672672808, NULL, NULL);
 INSERT INTO `sys_menu` VALUES (1338864007892807681, 0, '[0],', '代码生成', 'code_generate', 1, 'layui-icon-app', '/codeGenerate/index', '', 'systool', 1, 1, '代码生成1级菜单', 0, '2020-12-15 23:10:29', 1265476890672672808, '2020-12-15 23:54:55', 1265476890672672808);
+INSERT INTO `sys_menu` VALUES(5379001541494623328, 6213693439109919991, '[0],', '会员信息查看', 'gptuserinfo_index_detail', 2, NULL, NULL, 'chatGptUserInfo:detail', 'system', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_menu` VALUES(6213693439109919991, 1696035692261478402, '[0],[1696035692261478402],', '会员信息', 'gptuserinfo_index', 1, 'layui-icon-app', '/chatGptUserInfo/index', '', 'system', 1, 100, '', 0, NULL, NULL, '2023-08-28 13:43:41', 1265476890672672808);
+INSERT INTO `sys_menu` VALUES(6431822778262806257, 6213693439109919991, '[0],', '会员信息删除', 'gptuserinfo_index_delete', 2, NULL, NULL, 'chatGptUserInfo:delete', 'system', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_menu` VALUES(7118217124795268522, 6213693439109919991, '[0],', '会员信息查询', 'gptuserinfo_index_page', 2, NULL, NULL, 'chatGptUserInfo:page', 'system', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_menu` VALUES(7982532627542333853, 6213693439109919991, '[0],', '会员信息新增', 'gptuserinfo_index_add', 2, NULL, NULL, 'chatGptUserInfo:add', 'system', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_menu` VALUES(8280515204842302727, 6213693439109919991, '[0],', '会员信息编辑', 'gptuserinfo_index_edit', 2, NULL, NULL, 'chatGptUserInfo:edit', 'system', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_menu` VALUES(8957342019252527438, 6213693439109919991, '[0],', '会员信息列表', 'gptuserinfo_index_list', 2, NULL, NULL, 'chatGptUserInfo:list', 'systool', 1, 100, NULL, 0, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_message
